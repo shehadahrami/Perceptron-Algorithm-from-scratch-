@@ -1,0 +1,50 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from mlxtend.plotting import plot_decision_regions
+
+class perceptron(object):
+
+    def __init__(self, eta =.5, n_inter = 50):
+        self.eta = eta
+        self.n_inter = n_inter
+
+    def train (self, X,y):
+        self.weight_ = np.zeros(1 + X.shape[1]) #make an array of 0s for the weight to start off.
+        self.errors_ = [] #empty list for the erros during the perceptron iterations
+
+        for i in range(self.n_inter):
+            sum_errors = 0;
+
+            for xi, target_point in zip(X,y):
+                update = self.eta * (target_point -self.predict(xi))
+                print (update)
+                self.weight_[1:] += update * xi
+                self.weight_[0] += update
+                sum_errors += int(update != 0.0)
+            self.errors_.append(sum_errors)
+            return self
+
+    def net_input(self, X):
+            return np.dot(X, self.weight_[1:]) + self.weight_[0]
+
+    def predict(self, X):
+            return np.where(self.net_input(X) >= 0.0, 1, -1)
+
+df = pd.read_csv('dataset.csv')
+
+X = df.iloc[:,0:2].values
+
+df['y'] =np.where(df.iloc[:,1]> .5, -1, 1)
+y = np.array(df['y'])
+
+pla = perceptron(n_inter= 10, eta=.1)
+pla.train(X,y)
+
+plot_decision_regions(X,y,clf=pla)
+plt.title('Perceptron Learning')
+plt.xlabel("random number")
+plt.ylabel("random number")
+plt.show()
+
+print("number of iterations: " ,pla.errors_)
